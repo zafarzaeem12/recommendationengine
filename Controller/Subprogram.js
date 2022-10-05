@@ -49,16 +49,16 @@ const ProgramDetails = async (req, res) => {
 const Recommendation = async (req, res) => {
     // User selected events start here
     const recommeded = req.params.id;
-    const tagsearch = req.query;
-    var id = mongoose.Types.ObjectId(recommeded);
+    const tagsearch = req.query.tagsearch;
     const userid = req.params.uid;
+    var id = mongoose.Types.ObjectId(recommeded);
 
-    console.log("tagsearch",tagsearch)
 
     const agg = [
         {
             '$match': {
                 'ProgramCategory': id,
+                'programName' : tagsearch
             }
         }, {
             '$lookup': {
