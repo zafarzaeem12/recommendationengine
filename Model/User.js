@@ -24,6 +24,13 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    Location: {
+      type: {
+        type: String,
+        enum: ['Point', 'Polygon']
+      },
+      coordinates: [Number] 
+    }
   },
   { timestamps: true }
 );

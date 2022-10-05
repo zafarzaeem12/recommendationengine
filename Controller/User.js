@@ -9,10 +9,10 @@ const UserRegistration = async (req,res) => {
             username: req.body.username,
             email: req.body.email,
             password: CryptoJS.AES.encrypt( req.body.password ,process.env.SECRET_PASSWORD).toString(),
-            status: req.body.status
+            status: req.body.status,
+            Location : req.body.Location
     
         });
-        console.log(newUsers)
         const savedUser = await newUsers.save()
         res.send({
             message:"User Created Successfully",
@@ -31,10 +31,11 @@ const UserRegistration = async (req,res) => {
 // Register Api end here
 
 // Login Api start here
-const UserReservtion = async (req,res) => {
+const UserLogin = async (req,res) => {
     try {
-        const user = await User.findOne({ email: req.body.email});
+        const user = await Users.findOne({ email: req.body.email});
         const originalpassword = CryptoJS.AES.decrypt(user.password, process.env.SECRET_PASSWORD).toString(CryptoJS.enc.Utf8)
+        
         if(!user){
             res.send({
                 message:"Not Valid Email",
@@ -52,7 +53,7 @@ const UserReservtion = async (req,res) => {
                 { 
                 id: user._id,
                 isAdmin: user.isAdmin 
-                },process.env.JWT_TOKEN , { expiresIn:"20s" })
+                },process.env.JWT_TOKEN , { expiresIn:"20m" })
 
             const { password ,isAdmin,...detail} = user._doc
             res.send({
@@ -76,8 +77,8 @@ const GetAllUser = async(req,res) => {
     const limit = req.query.limit;
     const skip = (offset - 1) * limit;
     try{
-        const totaldata = await User.countDocuments();
-        const data = await User.find().limit(limit).skip(skip)
+        const totaldata = await Users.countDocuments();
+        const data = await Users.find().limit(limit).skip(skip)
         res.send({
             total:data.length ? data.length : totaldata,
             message:"All Users Fetch Successfully",
@@ -97,6 +98,6 @@ const GetAllUser = async(req,res) => {
 // Get All user Api end here
 module.exports = {
     UserRegistration,
-    UserReservtion ,
+    UserLogin ,
     GetAllUser
 }

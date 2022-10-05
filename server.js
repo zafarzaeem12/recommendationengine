@@ -5,6 +5,8 @@ const app = express();
 
 
 const users = require('./Route/User')
+const program = require('./Route/Program')
+const subprogram = require('./Route/Subprogram')
 
 require("dotenv/config");
 app.use(express.json());
@@ -13,10 +15,8 @@ databaseConn();
 
 
 app.use( "/api/user" , users);
-
-app.get('/' , (req,res) => {
-    res.send("iam just testing around herou server only")
-})
+app.use("/api/program" , program);
+app.use("/api/subprogram" , subprogram);
 
 const port = process.env.SERVER_PORT
 app.listen( port , ()=>{
