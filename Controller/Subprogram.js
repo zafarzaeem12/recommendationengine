@@ -52,8 +52,6 @@ const Recommendation = async (req, res) => {
     const tagsearch = req.query.tagsearch;
     const userid = req.params.uid;
     const id = mongoose.Types.ObjectId(recommeded);
-
-
     const agg = [
         {
             '$match': {
@@ -97,7 +95,6 @@ const Recommendation = async (req, res) => {
             }
         }
     ]
-
     const agg2 = [
         {
             '$match': {
@@ -133,27 +130,18 @@ const Recommendation = async (req, res) => {
             }
         }
     ]
-
     const onlyid = [];
-
     if (id === id) {
         const datas = await Subprogram.aggregate(agg2);
         onlyid.push([datas]);
     }
     const databyid = onlyid.flat([2]).map((data) => data)
-
-
-
-    const databysearch = []
-
+    const databysearch = [];
     if (id === id && tagsearch === tagsearch) {
         const dataswithidandsearch = await Subprogram.aggregate(agg);
         databysearch.push([dataswithidandsearch])
     }
     const idandsearch = databysearch.flat([2].map((data) => data))
-
-
-
     // User selected events end here
 
     // Suggestion events start here
