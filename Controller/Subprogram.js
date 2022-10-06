@@ -51,10 +51,54 @@ const Recommendation = async (req, res) => {
     const recommeded = req.params.id;
     const tagsearch = req.query.tagsearch;
     const userid = req.params.uid;
-    var id = mongoose.Types.ObjectId(recommeded);
+    const id = mongoose.Types.ObjectId(recommeded);
 
 
     const agg = [
+        {
+            '$match': {
+                $and:
+                    [
+                        { 'ProgramCategory': id },
+                        { 'programName': tagsearch }
+                    ],
+
+                // $or : [
+                //     { 'ProgramCategory': id } ,
+                // ]
+            }
+        }, {
+            '$lookup': {
+                'from': 'programs',
+                'localField': 'ProgramCategory',
+                'foreignField': '_id',
+                'as': 'results'
+            }
+        }, {
+            '$unwind': {
+                'path': '$results'
+            }
+        }, {
+            '$group': {
+                '_id': {
+                    'ProgramCategory': '$ProgramCategory',
+                    'programName': '$programName',
+                    'status': '$status',
+                    'ProgramLocation': '$ProgramLocation.coordinates',
+                    'createdAt': '$createdAt',
+                    'results': '$results'
+                }
+            }
+        }, {
+            '$limit': 10
+        }, {
+            '$sort': {
+                'createdAt': -1
+            }
+        }
+    ]
+
+    const agg2 = [
         {
             '$match': {
                 'ProgramCategory': id
@@ -64,17 +108,52 @@ const Recommendation = async (req, res) => {
                 'from': 'programs',
                 'localField': 'ProgramCategory',
                 'foreignField': '_id',
-                'as': 'result'
+                'as': 'results'
             }
+        }, {
+            '$unwind': {
+                'path': '$results'
+            }
+        }, {
+            '$group': {
+                '_id': {
+                    'ProgramCategory': '$ProgramCategory',
+                    'programName': '$programName',
+                    'status': '$status',
+                    'ProgramLocation': '$ProgramLocation.coordinates',
+                    'createdAt': '$createdAt',
+                    'results': '$results'
+                }
+            }
+        }, {
+            '$limit': 10
         }, {
             '$sort': {
                 'createdAt': -1
             }
         }
-    ];
+    ]
 
-    // const datas = await Subprogram.aggregate(agg);
-    const datas = await Subprogram.find({ $or : [{ ProgramCategory : id } ,{ programName : tagsearch }] }).populate('ProgramCategory')
+    const onlyid = [];
+
+    if (id === id) {
+        const datas = await Subprogram.aggregate(agg2);
+        onlyid.push([datas]);
+    }
+    const databyid = onlyid.flat([2]).map((data) => data)
+
+
+
+    const databysearch = []
+
+    if (id === id && tagsearch === tagsearch) {
+        const dataswithidandsearch = await Subprogram.aggregate(agg);
+        databysearch.push([dataswithidandsearch])
+    }
+    const idandsearch = databysearch.flat([2].map((data) => data))
+
+
+
     // User selected events end here
 
     // Suggestion events start here
@@ -93,7 +172,7 @@ const Recommendation = async (req, res) => {
 
     const sugg = fyp.flat([2]).map((data) => data?.ProgramLocation?.coordinates === data?.Location?.coordinates ? null : data)
     sugg.pop();
-    const pro = await Promise.all(["total", datas?.length, "User-Selection", datas, "Totol Suggestions", sugg?.length, "Suggestion", sugg, "CurrentUser", user])
+    const pro = await Promise.all(["User-Selection", id && tagsearch ? ["User_selection_total", idandsearch.length, idandsearch] : ["User_selection_total", databyid.length, databyid], "Totol Suggestions", sugg?.length, "Suggestion", sugg, "CurrentUser", user])
     // Suggestion events end here
 
     res.send({
