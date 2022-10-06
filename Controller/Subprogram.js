@@ -57,8 +57,7 @@ const Recommendation = async (req, res) => {
     const agg = [
         {
             '$match': {
-                'ProgramCategory': id,
-                'programName' : tagsearch
+                'ProgramCategory': id
             }
         }, {
             '$lookup': {
@@ -74,7 +73,8 @@ const Recommendation = async (req, res) => {
         }
     ];
 
-    const datas = await Subprogram.aggregate(agg);
+    // const datas = await Subprogram.aggregate(agg);
+    const datas = await Subprogram.find({ $or : [{ ProgramCategory : id } ,{ programName : tagsearch }] }).populate('ProgramCategory')
     // User selected events end here
 
     // Suggestion events start here
