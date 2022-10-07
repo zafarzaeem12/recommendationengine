@@ -51,7 +51,6 @@ const Recommendation = async (req, res) => {
     var tagsearch = req.query.tagsearch;
     const recommeded = req.params.id;
     const userid = req.params.uid;
-    console.log(tagsearch)
     const id = mongoose.Types.ObjectId(recommeded);
     const agg = [
         {
