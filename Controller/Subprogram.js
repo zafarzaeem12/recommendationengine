@@ -48,53 +48,50 @@ const ProgramDetails = async (req, res) => {
 
 const Recommendation = async (req, res) => {
     // User selected events start here
+    var tagsearch = req.query.tagsearch;
     const recommeded = req.params.id;
-    const tagsearch = req.query.tagsearch;
     const userid = req.params.uid;
+    console.log(tagsearch)
     const id = mongoose.Types.ObjectId(recommeded);
     const agg = [
         {
-            '$match': {
-                $and:
-                    [
-                        { 'ProgramCategory': id },
-                        { 'programName': tagsearch }
-                    ],
-
-                // $or : [
-                //     { 'ProgramCategory': id } ,
-                // ]
-            }
+          '$match': {
+             $and:
+                  [
+                    {'ProgramCategory': id } , 
+                    {'programName': { '$regex': tagsearch , '$options': 'i' }}
+        ]
+          }
         }, {
-            '$lookup': {
-                'from': 'programs',
-                'localField': 'ProgramCategory',
-                'foreignField': '_id',
-                'as': 'results'
-            }
+          '$lookup': {
+            'from': 'programs', 
+            'localField': 'ProgramCategory', 
+            'foreignField': '_id', 
+            'as': 'result'
+          }
         }, {
-            '$unwind': {
-                'path': '$results'
-            }
+          '$unwind': {
+            'path': '$result'
+          }
         }, {
-            '$group': {
-                '_id': {
-                    'ProgramCategory': '$ProgramCategory',
-                    'programName': '$programName',
-                    'status': '$status',
-                    'ProgramLocation': '$ProgramLocation.coordinates',
-                    'createdAt': '$createdAt',
-                    'results': '$results'
-                }
+          '$group': {
+            '_id': {
+              'ProgramCategory': '$ProgramCategory', 
+              'programName': '$programName', 
+              'status': '$status', 
+              'ProgramLocation': '$ProgramLocation.coordinates', 
+              'createdAt': '$createdAt', 
+              'result': '$result'
             }
+          }
         }, {
-            '$limit': 10
+          '$limit': 10
         }, {
-            '$sort': {
-                'createdAt': -1
-            }
+          '$sort': {
+            'createdAt': -1
+          }
         }
-    ]
+      ]
     const agg2 = [
         {
             '$match': {
