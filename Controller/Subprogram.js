@@ -55,7 +55,7 @@ const Recommendation = async (req, res) => {
         const userid = req?.params?.uid;
         const id = mongoose.Types.ObjectId(recommeded);
       
-        
+        // filter by Program_id start here
         const onlyid = [];
         if (id === id) {
             const agg2 = [
@@ -97,6 +97,9 @@ const Recommendation = async (req, res) => {
             onlyid.push([datas]);
         }
         const databyid = onlyid.flat([2]).map((data) => data)
+        // filter by Program_id end here
+
+        // filter by Program_id && Program_name with regex start here
         const databysearch = [];
         if (id === id && tagsearch === tagsearch) {
             const agg = [
@@ -142,6 +145,8 @@ const Recommendation = async (req, res) => {
             databysearch.push([dataswithidandsearch])
         }
         const idandsearch = databysearch.flat([2].map((data) => data))
+        // filter by Program_id && Program_name with regex end here
+        
         // User selected events end here
     
         // Suggestion events start here
