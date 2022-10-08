@@ -54,45 +54,60 @@ const Recommendation = async (req, res) => {
         const recommeded = req?.params?.id;
         const userid = req?.params?.uid;
         const id = mongoose.Types.ObjectId(recommeded);
-      
+        const limit = req?.query?.limit || 10 ;
+        const offset = req?.query?.offset || 1;
+        const skip = (offset - 1) * limit;
+    
         // filter by Program_id start here
         const onlyid = [];
         if (id === id) {
             const agg2 = [
                 {
-                    '$match': {
-                        'ProgramCategory': id
-                    }
+                  '$match': {
+                    'ProgramCategory': id
+                  }
                 }, {
-                    '$lookup': {
-                        'from': 'programs',
-                        'localField': 'ProgramCategory',
-                        'foreignField': '_id',
-                        'as': 'results'
-                    }
+                  '$lookup': {
+                    'from': 'programs', 
+                    'localField': 'ProgramCategory', 
+                    'foreignField': '_id', 
+                    'as': 'results'
+                  }
                 }, {
-                    '$unwind': {
-                        'path': '$results'
-                    }
+                  '$unwind': {
+                    'path': '$results'
+                  }
                 }, {
-                    '$group': {
-                        '_id': {
-                            'ProgramCategory': '$ProgramCategory',
-                            'programName': '$programName',
-                            'status': '$status',
-                            'ProgramLocation': '$ProgramLocation.coordinates',
-                            'createdAt': '$createdAt',
-                            'results': '$results'
-                        }
+                  '$group': {
+                    '_id': {
+                      'ProgramCategory': '$ProgramCategory', 
+                      'programName': '$programName', 
+                      'status': '$status', 
+                      'ProgramLocation': '$ProgramLocation.coordinates', 
+                      'createdAt': '$createdAt', 
+                      'results': '$results'
                     }
+                  }
                 }, {
-                    '$limit': 10
+                  '$facet': {
+                    'data': [
+                      {
+                        '$skip': Number(skip)
+                      }, {
+                        '$limit': Number(limit)
+                      }
+                    ]
+                  }
                 }, {
-                    '$sort': {
-                        'createdAt': -1
-                    }
+                  '$unwind': {
+                    'path': '$data'
+                  }
+                }, {
+                  '$sort': {
+                    'createdAt': -1
+                  }
                 }
-            ]
+              ]
             const datas = await Subprogram.aggregate(agg2);
             onlyid.push([datas]);
         }
@@ -159,7 +174,7 @@ const Recommendation = async (req, res) => {
             }
     
         }
-        const suggestion = await Subprogram.find(option);
+        const suggestion = await Subprogram.find(option)
         const fyp = [];
         fyp.push([suggestion, user]);
     
