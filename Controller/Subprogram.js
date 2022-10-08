@@ -190,7 +190,7 @@ const Recommendation = async (req, res) => {
         })
     } catch(err){
         res.send({
-            message: "Data Not Fetch Successfully",
+            message: "Data Not Found",
             status: 404
         })
     }
