@@ -1,5 +1,6 @@
 const Subprogram = require('../Model/Subprogram')
 const User = require('../Model/User')
+const Search = require('../Model/Search')
 var mongoose = require('mongoose');
 
 const ProgramCreated = async (req, res) => {
@@ -183,11 +184,27 @@ const Recommendation = async (req, res) => {
         const pro = await Promise.all(["User-Selection", id && tagsearch ? ["User_selection_total", idandsearch.length, idandsearch] : ["User_selection_total", databyid.length, databyid], "Totol Suggestions", sugg?.length, "Suggestion", sugg, "CurrentUser", user])
         // Suggestion events end here
     
-        res.send({
-            message: "Data Fetch Successfully",
-            status: 200,
-            data: pro
-        })
+        if(!tagsearch){
+            res.send({
+                message: "Data Fetch Successfully",
+                status: 200,
+                data: pro
+            })
+        }
+        else{
+          const savedtag = new Search({
+            search_Tag :   tagsearch,
+            program_Id :   recommeded,
+            user_Id    :   userid
+          });
+
+          const search = await savedtag.save();
+            res.send({
+              message: "Data Fetch Successfully",
+              status: 200,
+              data: {pro , search}
+          })
+        }
     } catch(err){
         res.send({
             message: "Data Not Found",
